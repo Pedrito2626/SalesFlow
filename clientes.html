@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clientes — SalesFlow</title>
+  <link rel="stylesheet" href="public/css/styles.css" />
+</head>
+<body>
+
+  <!-- ── Navegación ───────────────────────────────── -->
+  <nav class="nav">
+    <a href="index.html" class="nav__logo"><span class="nav__logo-text">Sales</span><span class="nav__logo-text2">Flow</span><span class="nav__logo-dot"></span></a>
+    <ul class="nav__links">
+      <li><a href="index.html"      class="nav__link">Inicio</a></li>
+      <li><a href="clientes.html"   class="nav__link nav__link--active">Clientes</a></li>
+      <li><a href="ventas.html"     class="nav__link">Nueva venta</a></li>
+      <li><a href="productos.html"  class="nav__link">Productos</a></li>
+    </ul>
+    <button class="nav__toggle" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <main>
+
+    <header class="page-header">
+      <div>
+        <h1 class="page-header__title">Gestión de clientes</h1>
+        <p class="page-header__sub">Registra nuevos clientes o búscalos por cédula.</p>
+      </div>
+    </header>
+
+    <div class="form-layout">
+
+      <!-- Formulario registro -->
+      <section class="form-card">
+        <div class="form-card__header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <h2>Registrar cliente</h2>
+        </div>
+        <form id="cliente-form" class="form-card__body" novalidate>
+
+          <div class="fields-row">
+            <div class="field">
+              <label for="cli-nombre">Nombre <span aria-hidden="true">*</span></label>
+              <input type="text" id="cli-nombre" name="nombre" placeholder="Nombre completo" required minlength="3" autocomplete="name" />
+              <span class="field__error" role="alert">Mínimo 3 caracteres.</span>
+            </div>
+            <div class="field">
+              <label for="cli-cedula">Cédula <span aria-hidden="true">*</span></label>
+              <input type="text" id="cli-cedula" name="cedula" placeholder="Ej: 1234567890" required pattern="[0-9]{6,12}" inputmode="numeric" />
+              <span class="field__error" role="alert">Solo dígitos (6–12 caracteres).</span>
+            </div>
+          </div>
+
+          <div class="fields-row">
+            <div class="field">
+              <label for="cli-telefono">Teléfono</label>
+              <input type="tel" id="cli-telefono" name="telefono" placeholder="Ej: 3001234567" autocomplete="tel" />
+            </div>
+            <div class="field">
+              <label for="cli-correo">Correo electrónico</label>
+              <input type="email" id="cli-correo" name="correo" placeholder="correo@ejemplo.com" autocomplete="email" />
+              <span class="field__error" role="alert">Ingresa un correo válido.</span>
+            </div>
+          </div>
+
+          <div class="btn-row--form">
+            <button type="submit" class="btn btn--primary">Registrar cliente</button>
+            <button type="reset"  class="btn btn--ghost">Limpiar</button>
+          </div>
+
+        </form>
+      </section>
+
+      <!-- Búsqueda de cliente -->
+      <aside class="summary-card" aria-label="Buscar cliente por cédula">
+        <div class="summary-card__header">
+          <h2>Buscar por cédula</h2>
+        </div>
+        <div class="summary-card__body">
+          <div class="field">
+            <label for="buscar-cedula">Cédula</label>
+            <input type="text" id="buscar-cedula" placeholder="Ej: 1234567890" inputmode="numeric" />
+          </div>
+          <button type="button" class="btn btn--ghost" onclick="buscarCliente()">Buscar</button>
+          <div id="resultado-cliente" class="cliente-result"></div>
+        </div>
+      </aside>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <p>SalesFlow · IF2003 Programación Web · Grupo 603</p>
+  </footer>
+
+  <script src="public/js/app.js"></script>
+  <script>
+    // Simulación búsqueda de cliente (sin backend)
+    const clientes = [
+      { cedula: '1234567890', nombre: 'Carlos Pérez', telefono: '3001234567', correo: 'carlos@mail.com' },
+      { cedula: '9876543210', nombre: 'Laura Gómez',  telefono: '3119876543', correo: 'laura@mail.com' },
+    ];
+    function buscarCliente() {
+      const q = document.getElementById('buscar-cedula').value.trim();
+      const el = document.getElementById('resultado-cliente');
+      const found = clientes.find(c => c.cedula === q);
+      if (!q) { el.innerHTML = ''; return; }
+      if (found) {
+      el.innerHTML = `
+          <div class="cliente-result-card">
+            <strong>${found.nombre}</strong>
+            <span>Cédula: ${found.cedula}</span>
+            <span>Tel: ${found.telefono}</span>
+            <span>Correo: ${found.correo}</span>
+          </div>`;
+      } else {
+        el.innerHTML = '<p class="error-msg">No se encontró ningún cliente con esa cédula.</p>';
+      }
+    }
+    // Validación del formulario de registro
+    document.getElementById('cliente-form').addEventListener('submit', e => {
+      e.preventDefault();
+      if (e.target.checkValidity()) {
+        alert('Cliente registrado correctamente.');
+        e.target.reset();
+      }
+    });
+  </script>
+</body>
+</html>

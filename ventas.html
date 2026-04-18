@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nueva venta — SalesFlow</title>
+  <link rel="stylesheet" href="public/css/styles.css" />
+</head>
+<body>
+
+  <!-- ── Navegación ───────────────────────────────── -->
+  <nav class="nav">
+    <a href="index.html" class="nav__logo"><span class="nav__logo-text">Sales</span><span class="nav__logo-text2">Flow</span><span class="nav__logo-dot"></span></a>
+    <ul class="nav__links">
+      <li><a href="index.html"      class="nav__link">Inicio</a></li>
+      <li><a href="clientes.html"   class="nav__link">Clientes</a></li>
+      <li><a href="ventas.html"     class="nav__link nav__link--active">Nueva venta</a></li>
+      <li><a href="productos.html"  class="nav__link">Productos</a></li>
+    </ul>
+    <button class="nav__toggle" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <main>
+
+    <!-- ── Encabezado ────────────────────────────── -->
+    <header class="page-header">
+      <div>
+        <h1 class="page-header__title">Nueva venta</h1>
+        <p class="page-header__sub">Asocia la venta a un cliente y agrega los productos.</p>
+      </div>
+    </header>
+
+    <!-- ── Layout formulario + resumen ──────────── -->
+    <div class="form-layout">
+
+      <!-- Formulario principal -->
+      <form id="venta-form" novalidate>
+
+        <!-- Sección: Cliente -->
+        <section class="form-card">
+          <div class="form-card__header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <h2>Datos del cliente</h2>
+          </div>
+          <div class="form-card__body">
+
+            <div class="field">
+              <label for="cedula">Cédula del cliente <span aria-hidden="true">*</span></label>
+              <input
+                type="text"
+                id="cedula"
+                name="cedula"
+                placeholder="Ej: 1234567890"
+                required
+                pattern="[0-9]{6,12}"
+                inputmode="numeric"
+                autocomplete="off"
+              />
+              <span class="field__hint">Solo dígitos, sin puntos ni espacios.</span>
+              <span class="field__error" role="alert">Ingresa una cédula válida (solo números).</span>
+            </div>
+
+            <div class="field">
+              <label for="nombre-cliente">Nombre del cliente <span aria-hidden="true">*</span></label>
+              <input
+                type="text"
+                id="nombre-cliente"
+                name="nombre_cliente"
+                placeholder="Ej: Carlos Pérez"
+                required
+                minlength="3"
+                autocomplete="name"
+              />
+              <span class="field__error" role="alert">El nombre debe tener al menos 3 caracteres.</span>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Sección: Productos -->
+        <section class="form-card" style="margin-top: 1.25rem;">
+          <div class="form-card__header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8"/><path d="M9 2v2.789a4 4 0 0 1-.672 2.219l-.656.984A4 4 0 0 0 7 10.212V20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-9.788a4 4 0 0 0-.672-2.219l-.656-.984A4 4 0 0 1 15 4.789V2"/></svg>
+            <h2>Agregar productos</h2>
+          </div>
+          <div class="form-card__body">
+
+            <div class="field">
+              <label for="producto-select">Producto <span aria-hidden="true">*</span></label>
+              <select id="producto-select" name="producto">
+                <option value="">Selecciona un producto…</option>
+                <option value="1" data-price="28000">Aguardiente Antioqueño 750ml — $28.000</option>
+                <option value="2" data-price="3500">Poker Lata 330ml — $3.500</option>
+                <option value="3" data-price="22000">Gato Negro Cabernet 750ml — $22.000</option>
+                <option value="4" data-price="45000">Ron Viejo de Caldas 700ml — $45.000</option>
+                <option value="5" data-price="138000">Old Parr 12 años 750ml — $138.000</option>
+                <option value="6" data-price="4200">Club Colombia Negra 330ml — $4.200</option>
+                <option value="7" data-price="65000">Champaña Chandon Extra Brut — $65.000</option>
+                <option value="8" data-price="14500">Nectar Rojo 375ml — $14.500</option>
+              </select>
+            </div>
+
+            <div class="fields-row">
+              <div class="field">
+                <label for="cantidad">Cantidad <span aria-hidden="true">*</span></label>
+                <input
+                  type="number"
+                  id="cantidad"
+                  name="cantidad"
+                  value="1"
+                  min="1"
+                  max="999"
+                  required
+                />
+                <span class="field__error" role="alert">La cantidad debe ser mayor a 0.</span>
+              </div>
+              <div class="field" style="justify-content: flex-end;">
+                <label>&nbsp;</label>
+                <button type="button" id="add-product-btn" class="btn btn--ghost">+ Agregar al resumen</button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+      
+
+        <!-- Sección: Notas -->
+        <section class="form-card" style="margin-top: 1.25rem;">
+          <div class="form-card__header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <h2>Observaciones</h2>
+          </div>
+          <div class="form-card__body">
+            <div class="field">
+              <label for="notas">Notas adicionales (opcional)</label>
+              <textarea
+                id="notas"
+                name="notas"
+                placeholder="Ej: cliente pagó con efectivo, dejó propina…"
+                maxlength="500"
+              ></textarea>
+              <span class="field__hint">Máximo 500 caracteres.</span>
+            </div>
+          </div>
+        </section>
+
+      </form>
+
+      <!-- Resumen de venta -->
+      <aside class="summary-card" aria-label="Resumen de la venta">
+        <div class="summary-card__header">
+          <h2>Resumen de venta</h2>
+        </div>
+        <div class="summary-items">
+          <p class="summary-empty">Sin productos agregados</p>
+        </div>
+        <div class="summary-total">
+          <span class="summary-total__label">Total</span>
+          <span class="summary-total__value">$0</span>
+        </div>
+        <div class="summary-actions">
+          <button type="submit" form="venta-form" class="btn btn--primary">Registrar venta</button>
+        </div>
+      </aside>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <p>SalesFlow · IF2003 Programación Web · Grupo 603</p>
+  </footer>
+
+  <script src="public/js/app.js"></script>
+</body>
+</html>
