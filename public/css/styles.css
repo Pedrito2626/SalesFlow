@@ -925,3 +925,11 @@ footer {
   .stats { grid-template-columns: 1fr 1fr; }
   .modules__grid { grid-template-columns: 1fr; }
 }
+/* ── Clases utilitarias ────────────────────────────── */
+.mt-5 {
+  margin-top: 1.25rem;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
