@@ -45,7 +45,7 @@ El proyecto es frontend puro en este primer avance — no requiere instalar depe
 
 1. Clona el repositorio:
    ```bash
-   git clone https://github.com/[tu-usuario]/salesflow.git
+   git clone https://github.com/Pedrito2626/SalesFlow.git
    cd salesflow
    ```
 
