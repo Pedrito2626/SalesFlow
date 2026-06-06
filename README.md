@@ -120,7 +120,7 @@ Tabla detallada con entradas y respuestas en [`docs/SRS.md`](docs/SRS.md).
 - [`docs/analisis.md`](docs/analisis.md) — análisis del sistema (actores, datos, restricciones).
 - [`docs/diagramas/diagramas.md`](docs/diagramas/diagramas.md) — diagramas D01–D08.
 - [`docs/mockups/mockups.md`](docs/mockups/mockups.md) — prototipo y relación mockup↔código.
-- [`docs/uso-ia.md`](docs/uso-ia.md) — registro de uso de IA.
+- [`docs/uso-ia.md`](docs/uso-IA.md) — registro de uso de IA.
 
 ---
 
