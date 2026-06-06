@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Productos — SalesFlow</title>
+  <link rel="stylesheet" href="public/css/styles.css" />
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="index.html" class="nav__logo">Sales<span>Flow</span></a>
+    <ul class="nav__links">
+      <li><a href="index.html"     class="nav__link">Inicio</a></li>
+      <li><a href="clientes.html"  class="nav__link">Clientes</a></li>
+      <li><a href="ventas.html"    class="nav__link">Nueva venta</a></li>
+      <li><a href="productos.html" class="nav__link nav__link--active">Productos</a></li>
+    </ul>
+    <button class="nav__toggle" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <main>
+
+    <header class="page-header">
+      <div>
+        <h1 class="page-header__title">Productos</h1>
+        <p class="page-header__sub" id="mode-desc">Catálogo disponible en inventario</p>
+      </div>
+      <div class="mode-toggle" role="group" aria-label="Cambiar modo de vista">
+        <button id="btn-catalogo" class="mode-btn mode-btn--active" onclick="setMode('catalogo')">Ver catálogo</button>
+        <button id="btn-gestionar" class="mode-btn" onclick="setMode('gestionar')">Gestionar</button>
+      </div>
+    </header>
+
+    <!-- ── Búsqueda y filtros (ambos modos) ─────────── -->
+    <section aria-label="Filtros de búsqueda">
+      <div class="search-bar">
+        <input type="search" id="search-input" placeholder="Buscar por nombre o categoría…" aria-label="Buscar producto" />
+        <select id="cat-filter" aria-label="Filtrar por categoría">
+          <option value="">Todas las categorías</option>
+          <option value="aguardiente">Aguardiente</option>
+          <option value="cerveza">Cerveza</option>
+          <option value="vino">Vino</option>
+          <option value="ron">Ron</option>
+          <option value="whisky">Whisky</option>
+          <option value="otros">Otros</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- ── MODO CATÁLOGO: grilla de cards (poblada por JS) ─ -->
+    <section id="modo-catalogo" aria-label="Catálogo de productos">
+      <div class="product-grid" id="product-grid"></div>
+    </section>
+
+    <!-- ── MODO GESTIONAR: formulario + tabla ────────── -->
+    <section id="modo-gestionar" aria-label="Gestión de inventario" hidden>
+
+      <div class="inv-actions">
+        <button type="button" class="btn btn--primary btn--sm" onclick="toggleFormNuevo()">+ Nuevo producto</button>
+      </div>
+
+      <div id="form-nuevo" hidden>
+        <div class="form-card">
+          <div class="form-card__header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <h2 id="form-titulo">Agregar producto</h2>
+          </div>
+          <form id="producto-form" class="form-card__body" novalidate>
+            <div class="fields-row">
+              <div class="field">
+                <label for="p-nombre">Nombre <span aria-hidden="true">*</span></label>
+                <input type="text" id="p-nombre" name="nombre" placeholder="Ej: Aguardiente Antioqueño 750ml" required minlength="3" />
+                <span class="field__error" role="alert">Mínimo 3 caracteres.</span>
+              </div>
+              <div class="field">
+                <label for="p-cat">Categoría <span aria-hidden="true">*</span></label>
+                <select id="p-cat" name="categoria" required>
+                  <option value="">Selecciona…</option>
+                  <option value="aguardiente">Aguardiente</option>
+                  <option value="cerveza">Cerveza</option>
+                  <option value="vino">Vino</option>
+                  <option value="ron">Ron</option>
+                  <option value="whisky">Whisky</option>
+                  <option value="otros">Otros</option>
+                </select>
+              </div>
+            </div>
+            <div class="fields-row">
+              <div class="field">
+                <label for="p-precio">Precio (COP) <span aria-hidden="true">*</span></label>
+                <input type="number" id="p-precio" name="precio" placeholder="Ej: 28000" required min="1" step="100" />
+                <span class="field__error" role="alert">El precio debe ser mayor a $0.</span>
+              </div>
+              <div class="field">
+                <label for="p-stock">Stock inicial <span aria-hidden="true">*</span></label>
+                <input type="number" id="p-stock" name="stock" placeholder="Ej: 20" required min="0" />
+                <span class="field__error" role="alert">El stock no puede ser negativo.</span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="p-desc">Descripción</label>
+              <textarea id="p-desc" name="descripcion" placeholder="Descripción breve del producto…" maxlength="500"></textarea>
+              <span class="field__hint">Máximo 500 caracteres.</span>
+            </div>
+            <div class="btn-row--form">
+              <button type="submit" class="btn btn--primary">Guardar producto</button>
+              <button type="button" id="cancel-edit-btn" class="btn btn--ghost" onclick="toggleFormNuevo()">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="inv-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Producto</th>
+              <th scope="col">Categoría</th>
+              <th scope="col">Precio</th>
+              <th scope="col">Stock</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="inv-tbody"></tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer>
+    <p>SalesFlow · IF2003 Programación Web · Grupo 603</p>
+  </footer>
+
+  <script src="public/js/api.js"></script>
+  <script src="public/js/ui.js"></script>
+  <script src="public/js/app.js"></script>
+  <script src="public/js/productos.js"></script>
+</body>
+</html>

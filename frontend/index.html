@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SalesFlow — Gestión de licorera</title>
+  <link rel="stylesheet" href="public/css/styles.css" />
+</head>
+<body>
+
+  <!-- ── Navegación ───────────────────────────────── -->
+  <nav class="nav">
+    <a href="index.html" class="nav__logo">Sales<span>Flow</span></a>
+    <ul class="nav__links">
+      <li><a href="index.html"      class="nav__link">Inicio</a></li>
+      <li><a href="clientes.html"   class="nav__link">Clientes</a></li>
+      <li><a href="ventas.html"     class="nav__link">Nueva venta</a></li>
+      <li><a href="productos.html"  class="nav__link">Productos</a></li>
+      
+    </ul>
+    <button class="nav__toggle" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <main>
+
+    <!-- ── Hero ─────────────────────────────────── -->
+    <section class="hero">
+      <span class="hero__tag">Sistema de gestión</span>
+      <h1 class="hero__title">Controla tu licorera <em>sin fricciones</em></h1>
+      <p class="hero__desc">
+        Registra ventas, gestiona clientes y mantén tu inventario al día
+        desde un solo lugar. Rápido, claro y sin complicaciones.
+      </p>
+      <div class="hero__actions">
+        <a href="ventas.html"   class="btn btn--primary">Nueva venta</a>
+        <a href="productos.html" class="btn btn--ghost">Ver catálogo</a>
+      </div>
+    </section>
+
+    <!-- ── Estadísticas ───────────────────────────── -->
+    <section class="stats" aria-label="Resumen del día">
+      <div class="stat">
+        <p class="stat__label">Ventas hoy</p>
+        <p class="stat__value" id="stat-ventas">…</p>
+      </div>
+      <div class="stat">
+        <p class="stat__label">Ingresos hoy</p>
+        <p class="stat__value" id="stat-ingresos">…</p>
+      </div>
+      <div class="stat">
+        <p class="stat__label">Productos en stock</p>
+        <p class="stat__value" id="stat-stock">…</p>
+      </div>
+      <div class="stat">
+        <p class="stat__label">Clientes registrados</p>
+        <p class="stat__value" id="stat-clientes">…</p>
+      </div>
+    </section>
+
+    <!-- ── Módulos ───────────────────────────────── -->
+    <section class="modules">
+      <p class="modules__title">Módulos del sistema</p>
+      <div class="modules__grid">
+
+        <a href="clientes.html" class="module-card">
+          <div class="module-card__icon">👤</div>
+          <h2 class="module-card__title">Clientes</h2>
+          <p class="module-card__desc">Registra nuevos clientes y consulta el historial por cédula.</p>
+          <span class="module-card__link">Ir al módulo →</span>
+        </a>
+
+        <a href="ventas.html" class="module-card">
+          <div class="module-card__icon">🧾</div>
+          <h2 class="module-card__title">Nueva venta</h2>
+          <p class="module-card__desc">Crea una venta seleccionando productos del catálogo y asociándola a un cliente.</p>
+          <span class="module-card__link">Crear venta →</span>
+        </a>
+
+        <a href="productos.html" class="module-card">
+          <div class="module-card__icon">🍾</div>
+          <h2 class="module-card__title">Productos</h2>
+          <p class="module-card__desc">Busca y filtra el catálogo completo de licores disponibles.</p>
+          <span class="module-card__link">Ver catálogo →</span>
+        </a>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>SalesFlow · IF2003 Programación Web · Grupo 603</p>
+  </footer>
+
+  <script src="public/js/api.js"></script>
+  <script src="public/js/ui.js"></script>
+  <script src="public/js/app.js"></script>
+  <script src="public/js/dashboard.js"></script>
+</body>
+</html>
