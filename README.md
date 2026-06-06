@@ -26,10 +26,9 @@ Relación entre el prototipo y la implementación: ver [`docs/mockups/mockups.md
 
 | Nombre | Rol principal | Responsabilidades |
 |--------|---------------|-------------------|
-| *(completar)* | Backend | API REST, controladores, servicios |
-| *(completar)* | Frontend | Vistas, consumo de API, estados de interfaz |
-| *(completar)* | Documentación | SRS, diagramas, arquitectura |
-| *(completar)* | QA / Datos | Pruebas, datos seed, persistencia |
+| *Esteban Ramirez* | Backend | API REST, controladores, servicios |
+| *David Valencia* | Frontend | Vistas, consumo de API, estados de interfaz |
+| *Santiago Velez* | Documentación | SRS, diagramas, arquitectura |
 
 ---
 
