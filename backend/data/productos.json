@@ -1,0 +1,66 @@
+[
+  {
+    "id": 1,
+    "nombre": "Aguardiente Antioqueño 750ml",
+    "categoria": "aguardiente",
+    "precio": 28000,
+    "stock": 42,
+    "descripcion": "Sin azúcar, botella de 750ml. El más vendido de la región."
+  },
+  {
+    "id": 2,
+    "nombre": "Poker Lata 330ml",
+    "categoria": "cerveza",
+    "precio": 3500,
+    "stock": 120,
+    "descripcion": "Cerveza rubia, lata de 330ml. Presentación individual."
+  },
+  {
+    "id": 3,
+    "nombre": "Gato Negro Cabernet 750ml",
+    "categoria": "vino",
+    "precio": 22000,
+    "stock": 4,
+    "descripcion": "Vino tinto chileno, botella 750ml. Suave y frutado."
+  },
+  {
+    "id": 4,
+    "nombre": "Ron Viejo de Caldas 700ml",
+    "categoria": "ron",
+    "precio": 45000,
+    "stock": 18,
+    "descripcion": "Ron añejo colombiano, botella de 700ml. 8 años de añejamiento."
+  },
+  {
+    "id": 5,
+    "nombre": "Old Parr 12 años 750ml",
+    "categoria": "whisky",
+    "precio": 138000,
+    "stock": 7,
+    "descripcion": "Scotch blend, botella 750ml. Notas a caramelo y vainilla."
+  },
+  {
+    "id": 6,
+    "nombre": "Club Colombia Negra 330ml",
+    "categoria": "cerveza",
+    "precio": 4200,
+    "stock": 3,
+    "descripcion": "Cerveza oscura de malta, lata 330ml. Cuerpo robusto."
+  },
+  {
+    "id": 7,
+    "nombre": "Champaña Chandon Extra Brut",
+    "categoria": "otros",
+    "precio": 65000,
+    "stock": 9,
+    "descripcion": "Espumante argentino, botella 750ml. Ideal para celebraciones."
+  },
+  {
+    "id": 8,
+    "nombre": "Nectar Rojo 375ml",
+    "categoria": "aguardiente",
+    "precio": 14500,
+    "stock": 31,
+    "descripcion": "Media botella, ideal para llevar. Sabor suave y dulce."
+  }
+]
