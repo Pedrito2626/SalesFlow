@@ -2,10 +2,7 @@
 
 **Proyecto:** SalesFlow · Sistema de gestión de ventas e inventario para licorera  
 **Curso:** IF2003 Programación Web · Grupo 603  
-**Autores:** 
-- David Santiago Valencia Echeverry
-- Esteban Ramírez Cáceres
-- Santiago Vélez Escobar
+**Autor:** [Tu nombre completo]
 
 ---
 
@@ -106,51 +103,51 @@ SalesFlow gestiona clientes, productos y ventas — cada una con lógica propia.
 **2. Las vistas ya existen y son independientes del servidor**
 Las cuatro vistas (`index.html`, `clientes.html`, `ventas.html`, `productos.html`) fueron construidas como HTML/CSS puro sin acoplamiento al backend. Esto es MVC por naturaleza: la capa View funciona de forma autónoma y se comunicará con los controladores únicamente a través de peticiones HTTP.
 
-**3. Facilidad de sustitución de la base de datos**
-Si se necesita cambiar MySQL por PostgreSQL, solo se modifican los archivos dentro de `models/`. Los controladores y las vistas no requieren ningún cambio, ya que no conocen el motor de base de datos.
+**3. Facilidad de sustitución del mecanismo de persistencia**
+La persistencia actual es en **archivos JSON** y vive aislada en la capa de `services/`. Si en el futuro se cambia a una base de datos (MySQL, PostgreSQL, etc.), solo se modifican esos archivos de servicios; los controladores y las vistas no requieren ningún cambio, ya que no conocen cómo se guardan los datos.
 
 **4. Compatibilidad directa con Express.js**
-Node.js + Express implementa MVC de forma directa: las rutas (`routes/`) son el punto de entrada, los controladores (`controllers/`) contienen la lógica, y los modelos (`models/`) manejan el acceso a MySQL.
+Node.js + Express implementa MVC de forma directa: las rutas (`routes/`) son el punto de entrada, los controladores (`controllers/`) contienen la lógica y validación, y los servicios (`services/`) manejan la lectura/escritura de los archivos JSON.
 
 ### Estructura de carpetas que refleja el patrón
 
 ```
 salesflow/
-├── index.html          ← View: dashboard principal
-├── clientes.html       ← View: gestión de clientes
-├── ventas.html         ← View: formulario POS
-├── productos.html      ← View: catálogo + inventario (toggle)
-├── public/
-│   ├── css/styles.css  ← View: estilos globales (Outfit + DM Sans)
-│   └── js/app.js       ← View: lógica del cliente (carrito, búsqueda, nav)
-├── controllers/        ← Controller: lógica de negocio (planeado)
-│   ├── clienteController.js
-│   ├── productoController.js
-│   └── ventaController.js
-├── routes/             ← Controller: puntos de entrada HTTP (planeado)
-│   ├── clientes.js
-│   ├── productos.js
-│   └── ventas.js
-└── models/             ← Model: acceso a datos MySQL (planeado)
-    ├── clienteModel.js
-    ├── productoModel.js
-    ├── ventaModel.js
-    └── db.js
+├── frontend/                ← Capa View
+│   ├── index.html           ← dashboard principal
+│   ├── clientes.html        ← gestión de clientes
+│   ├── ventas.html          ← formulario POS
+│   ├── productos.html       ← catálogo + inventario (toggle)
+│   └── public/
+│       ├── css/styles.css   ← estilos globales (Outfit + DM Sans)
+│       └── js/              ← lógica del cliente
+│           ├── api.js       ← consumo de la API (Fetch)
+│           ├── ui.js        ← toasts y estados de interfaz
+│           ├── app.js       ← navegación
+│           ├── dashboard.js · productos.js · clientes.js · ventas.js
+├── backend/                 ← Capas Controller + Model (servicios)
+│   ├── src/
+│   │   ├── routes/          ← Controller: puntos de entrada HTTP
+│   │   ├── controllers/     ← Controller: lógica de negocio y validación
+│   │   ├── services/        ← Model: lectura/escritura de los JSON
+│   │   └── middleware/      ← manejo centralizado de errores
+│   └── data/                ← persistencia: productos.json · clientes.json · ventas.json
+└── docs/
 ```
 
 ### Respuesta a 3 de las 7 preguntas del análisis de patrones
 
 | Pregunta | Respuesta para SalesFlow |
 |----------|--------------------------|
-| ¿Cómo se divide el sistema? | En tres capas: **Model** (datos y MySQL), **View** (HTML/CSS/JS en el navegador) y **Controller** (lógica de negocio en Express.js) |
-| ¿Dónde vive la lógica de negocio? | En `controllers/`. Ejemplo: la validación de stock antes de procesar una venta vive en `ventaController.js` |
-| ¿Qué tan fácil es cambiar la base de datos? | Solo se modifican los archivos de `models/`. Los controladores y vistas no cambian |
+| ¿Cómo se divide el sistema? | En tres capas: **Model** (servicios que leen/escriben los archivos JSON), **View** (HTML/CSS/JS en el navegador) y **Controller** (lógica de negocio en Express.js) |
+| ¿Dónde vive la lógica de negocio? | En `backend/src/controllers/`. Ejemplo: la validación de stock antes de procesar una venta vive en `controllers/ventas.js` |
+| ¿Qué tan fácil es cambiar la persistencia? | Solo se modifican los archivos de `services/`. Los controladores y vistas no cambian |
 
 ---
 
 ## Mapeo de vistas a rutas
 
-Cada vista del proyecto tiene acciones que se mapean a endpoints del backend. Aunque el backend no está implementado en este avance, la planificación de rutas demuestra que la arquitectura fue diseñada, no improvisada.
+Cada vista del proyecto consume endpoints reales del backend mediante Fetch API. Este es el mapeo de acciones del frontend a la API REST implementada:
 
 | Vista | Acción en el frontend | Método HTTP | Endpoint backend | Descripción |
 |-------|-----------------------|-------------|------------------|-------------|
