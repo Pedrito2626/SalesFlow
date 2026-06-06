@@ -97,38 +97,9 @@
     <p>SalesFlow · IF2003 Programación Web · Grupo 603</p>
   </footer>
 
+  <script src="public/js/api.js"></script>
+  <script src="public/js/ui.js"></script>
   <script src="public/js/app.js"></script>
-  <script>
-    // Simulación búsqueda de cliente (sin backend)
-    const clientes = [
-      { cedula: '1234567890', nombre: 'Carlos Pérez', telefono: '3001234567', correo: 'carlos@mail.com' },
-      { cedula: '9876543210', nombre: 'Laura Gómez',  telefono: '3119876543', correo: 'laura@mail.com' },
-    ];
-    function buscarCliente() {
-      const q = document.getElementById('buscar-cedula').value.trim();
-      const el = document.getElementById('resultado-cliente');
-      const found = clientes.find(c => c.cedula === q);
-      if (!q) { el.innerHTML = ''; return; }
-      if (found) {
-      el.innerHTML = `
-          <div class="cliente-result-card">
-            <strong>${found.nombre}</strong>
-            <span>Cédula: ${found.cedula}</span>
-            <span>Tel: ${found.telefono}</span>
-            <span>Correo: ${found.correo}</span>
-          </div>`;
-      } else {
-        el.innerHTML = '<p class="error-msg">No se encontró ningún cliente con esa cédula.</p>';
-      }
-    }
-    // Validación del formulario de registro
-    document.getElementById('cliente-form').addEventListener('submit', e => {
-      e.preventDefault();
-      if (e.target.checkValidity()) {
-        alert('Cliente registrado correctamente.');
-        e.target.reset();
-      }
-    });
-  </script>
+  <script src="public/js/clientes.js"></script>
 </body>
 </html>
