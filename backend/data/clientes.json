@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "nombre": "Carlos Pérez",
+    "cedula": "1234567890",
+    "telefono": "3001234567",
+    "correo": "carlos@mail.com"
+  },
+  {
+    "id": 2,
+    "nombre": "Laura Gómez",
+    "cedula": "9876543210",
+    "telefono": "3119876543",
+    "correo": "laura@mail.com"
+  }
+]
