@@ -1,5 +1,7 @@
 # SalesFlow — Diagramas de Arquitectura y Diseño
 
+> Persistencia del sistema: **archivos JSON** gestionados por el backend (capa `services/`). No se usa base de datos relacional.
+
 ---
 
 ## D01. Diagrama de Casos de Uso
@@ -61,7 +63,7 @@ flowchart TD
     FORM_C --> VAL_C{¿Campos\nválidos?}
     VAL_C -- No --> ERR_C[Mensaje de error\nen campo]
     ERR_C --> FORM_C
-    VAL_C -- Sí --> OK_C[✅ Cliente registrado\nalert de confirmación]
+    VAL_C -- Sí --> OK_C[✅ Cliente registrado\ntoast de confirmación]
 
     CLIENTES --> BUSCAR[Buscar por cédula]
     BUSCAR --> FOUND{¿Encontrado?}
@@ -78,7 +80,7 @@ flowchart TD
     MORE -- Sí --> SEL_P
     MORE -- No --> SUBMIT_V[Click "Registrar venta"]
     SUBMIT_V --> VAL_V{¿Carrito\nvacío?}
-    VAL_V -- Sí --> ALERT_V[⚠️ Alerta: agrega\nal menos un producto]
+    VAL_V -- Sí --> ALERT_V[⚠️ Toast: agrega\nal menos un producto]
     ALERT_V --> SEL_P
     VAL_V -- No --> OK_V[✅ Venta registrada\nFormulario limpiado]
 
@@ -111,48 +113,48 @@ flowchart TD
 
 ## D03. Diagrama Entidad-Relación (Modelo de Datos)
 
+> Modelo lógico. La persistencia real es en archivos JSON; el detalle de venta se guarda **embebido** dentro de cada venta (no como tabla independiente).
+
 ```mermaid
 erDiagram
     CLIENTE {
         int id PK
-        varchar nombre
-        varchar cedula UK
-        varchar telefono
-        varchar correo
+        string nombre
+        string cedula UK
+        string telefono
+        string correo
     }
 
     VENTA {
         int id PK
-        varchar cliente_cedula FK
-        varchar cliente_nombre
-        datetime fecha
-        decimal total
-        text notas
+        string cliente_cedula
+        string cliente_nombre
+        string fecha
+        int total
+        string notas
     }
 
     DETALLE_VENTA {
-        int id PK
-        int venta_id FK
-        int producto_id FK
+        int producto_id
         int cantidad
-        decimal precio_unitario
+        int precio_unitario
     }
 
     PRODUCTO {
         int id PK
-        varchar nombre
-        varchar categoria
-        decimal precio
+        string nombre
+        string categoria
+        int precio
         int stock
-        text descripcion
+        string descripcion
     }
 
-    CLIENTE ||--o{ VENTA : "realiza"
-    VENTA ||--|{ DETALLE_VENTA : "contiene"
+    CLIENTE ||--o{ VENTA : "realiza (por cédula)"
+    VENTA ||--|{ DETALLE_VENTA : "contiene (embebido)"
     PRODUCTO ||--o{ DETALLE_VENTA : "aparece en"
 ```
 
-**Estructura JSON esperada (si se usa persistencia JSON en lugar de MySQL):**
+**Estructura JSON usada como persistencia** (archivos en `backend/data/`):
 
 ```json
 {
@@ -160,9 +162,9 @@ erDiagram
     {
       "id": 1,
       "nombre": "Carlos Pérez",
-      "cedula": "1023456789",
+      "cedula": "1234567890",
       "telefono": "3001234567",
-      "correo": "carlos@email.com"
+      "correo": "carlos@mail.com"
     }
   ],
   "productos": [
@@ -178,9 +180,9 @@ erDiagram
   "ventas": [
     {
       "id": 1,
-      "cliente_cedula": "1023456789",
+      "cliente_cedula": "1234567890",
       "cliente_nombre": "Carlos Pérez",
-      "fecha": "2026-06-05T15:30:00",
+      "fecha": "2026-06-06T15:30:00.000Z",
       "total": 59500,
       "notas": "Pagó con efectivo",
       "detalle": [
@@ -204,15 +206,15 @@ C4Context
     Person(admin, "Administrador", "Gestiona inventario y catálogo")
 
     System_Boundary(salesflow, "SalesFlow") {
-        Container(frontend, "Frontend", "HTML5 · CSS3 · JS Vanilla", "4 vistas estáticas: index, clientes, ventas, productos")
-        Container(backend, "Backend (planeado)", "Node.js · Express.js", "API REST MVC en puerto 3000")
-        ContainerDb(db, "Base de datos (planeada)", "MySQL", "Tablas: clientes, productos, ventas, detalle_venta")
+        Container(frontend, "Frontend", "HTML5 · CSS3 · JS Vanilla", "4 vistas que consumen la API con fetch()")
+        Container(backend, "Backend", "Node.js · Express.js", "API REST MVC; sirve también el frontend estático en :3000")
+        ContainerDb(db, "Persistencia", "Archivos JSON", "backend/data: productos.json, clientes.json, ventas.json")
     }
 
     Rel(vendedor, frontend, "Usa", "HTTP / navegador")
     Rel(admin, frontend, "Usa", "HTTP / navegador")
     Rel(frontend, backend, "Llama", "HTTP/JSON · /api/*")
-    Rel(backend, db, "Consulta", "SQL · mysql2")
+    Rel(backend, db, "Lee / escribe", "fs (services/)")
 ```
 
 ---
@@ -227,37 +229,41 @@ graph TB
         V3["ventas.html\nFormulario POS + carrito"]
         V4["productos.html\nCatálogo + gestión CRUD"]
         CSS["public/css/styles.css\nEstilos globales (Outfit, DM Sans)"]
-        JS["public/js/app.js\nNav toggle · carrito · búsqueda · filtros"]
-    end
-
-    subgraph CTRL["⚙️ Capa Controlador (Backend planeado)"]
-        C1["clienteController.js\nValidar, crear, buscar cliente"]
-        C2["productoController.js\nCRUD productos, stock"]
-        C3["ventaController.js\nValidar stock, registrar venta"]
+        JS["public/js/\napi.js · ui.js · app.js\ndashboard.js · productos.js · clientes.js · ventas.js"]
     end
 
     subgraph ROUTES["🔀 Rutas (Express)"]
-        R1["routes/clientes.js\nPOST /api/clientes\nGET  /api/clientes/:cedula"]
-        R2["routes/productos.js\nGET/POST /api/productos\nPUT/PATCH/DELETE /api/productos/:id"]
-        R3["routes/ventas.js\nPOST /api/ventas"]
+        R1["routes/clientes.js\nGET /api/clientes · GET /api/clientes/:cedula · POST"]
+        R2["routes/productos.js\nGET/POST · GET search · PUT/PATCH/DELETE /:id"]
+        R3["routes/ventas.js\nGET · POST /api/ventas"]
+        R4["routes/stats.js\nGET /api/stats"]
     end
 
-    subgraph MODEL["🗄️ Capa Modelo (MySQL)"]
-        M1["clienteModel.js"]
-        M2["productoModel.js"]
-        M3["ventaModel.js"]
-        DB["db.js — pool de conexión MySQL"]
+    subgraph CTRL["⚙️ Capa Controlador (Backend)"]
+        C1["controllers/clientes.js\nValidar, crear, buscar cliente"]
+        C2["controllers/productos.js\nCRUD productos, stock, búsqueda"]
+        C3["controllers/ventas.js\nValidar stock, registrar venta"]
+        C4["controllers/stats.js\nIndicadores del día"]
     end
 
-    V2 & V3 & V4 -->|"fetch() HTTP/JSON"| ROUTES
+    subgraph MODEL["🗄️ Capa Servicios (archivos JSON)"]
+        M1["services/clientes.js\nleer() / guardar()"]
+        M2["services/productos.js\nleer() / guardar()"]
+        M3["services/ventas.js\nleer() / guardar()"]
+        DATA["backend/data/*.json"]
+    end
+
+    V1 & V2 & V3 & V4 -->|"fetch() HTTP/JSON"| ROUTES
     R1 --> C1
     R2 --> C2
     R3 --> C3
+    R4 --> C4
     C1 --> M1
     C2 --> M2
     C3 --> M2
     C3 --> M3
-    M1 & M2 & M3 --> DB
+    C4 --> M1 & M2 & M3
+    M1 & M2 & M3 --> DATA
 ```
 
 ---
@@ -270,50 +276,45 @@ graph TB
 sequenceDiagram
     actor Vendedor
     participant UI as ventas.html
-    participant JS as app.js
+    participant JS as ventas.js
     participant API as POST /api/ventas
-    participant VC as ventaController
-    participant PM as productoModel
-    participant VM as ventaModel
-    participant DB as MySQL
+    participant VC as controllers/ventas
+    participant SP as services/productos
+    participant SV as services/ventas
+    participant DATA as data/*.json
 
     Vendedor->>UI: Llena cédula y nombre del cliente
     Vendedor->>UI: Selecciona producto + cantidad
     Vendedor->>UI: Click "+ Agregar al resumen"
-    UI->>JS: addBtn.click()
-    JS->>JS: cartItems.push({id, name, price, qty})
+    JS->>JS: cart.push({id, nombre, precio, cantidad})
     JS->>UI: updateSummary() — renderiza items y total
 
     Vendedor->>UI: Click "Registrar venta"
     UI->>JS: ventaForm.submit()
-    JS->>JS: ¿cartItems.length === 0?
+    JS->>JS: ¿cart.length === 0?
     alt Carrito vacío
-        JS->>UI: alert("Agrega al menos un producto")
+        JS->>UI: toast("Agrega al menos un producto")
     else Carrito con items
-        JS->>API: POST /api/ventas {cliente, items[]}
-        API->>VC: registrarVenta(req.body)
+        JS->>API: POST {cedula, nombre_cliente, items[], notas}
+        API->>VC: crear(req.body)
+        VC->>SP: leer() (productos.json)
         loop Por cada item
-            VC->>PM: verificarStock(producto_id, cantidad)
-            PM->>DB: SELECT stock FROM productos WHERE id=?
-            DB-->>PM: stock actual
+            VC->>VC: ¿stock suficiente?
             alt Stock insuficiente
-                PM-->>VC: Error: stock insuficiente
-                VC-->>API: 400 Bad Request
-                API-->>JS: {error: "Stock insuficiente"}
-                JS-->>UI: Mostrar error al usuario
+                VC-->>API: 400 {error: "Stock insuficiente..."}
+                API-->>JS: error
+                JS-->>UI: toast de error
             end
         end
-        VC->>VM: crearVenta(datos)
-        VM->>DB: INSERT INTO ventas ...
-        VM->>DB: INSERT INTO detalle_venta ...
-        VM->>DB: UPDATE productos SET stock = stock - cantidad
-        DB-->>VM: OK
-        VM-->>VC: ventaId
-        VC-->>API: 201 Created {id: ventaId}
-        API-->>JS: {success: true}
-        JS->>UI: alert("Venta registrada correctamente")
-        JS->>JS: cartItems = [] + ventaForm.reset()
-        JS->>UI: updateSummary() — limpia resumen
+        VC->>SP: guardar() — descuenta stock
+        VC->>SV: guardar() — agrega venta con detalle[]
+        SP->>DATA: writeFileSync(productos.json)
+        SV->>DATA: writeFileSync(ventas.json)
+        VC-->>API: 201 Created {venta}
+        API-->>JS: {success, data: venta}
+        JS->>UI: toast("Venta registrada · Total $...")
+        JS->>JS: cart = [] + form.reset()
+        JS->>UI: recarga selector (stock actualizado)
     end
 ```
 
@@ -323,39 +324,33 @@ sequenceDiagram
 sequenceDiagram
     actor Admin
     participant UI as productos.html
+    participant JS as productos.js
     participant API as POST /api/productos
-    participant PC as productoController
-    participant PM as productoModel
-    participant DB as MySQL
+    participant PC as controllers/productos
+    participant SP as services/productos
+    participant DATA as data/productos.json
 
     Admin->>UI: Click "Gestionar" (toggle)
     UI->>UI: setMode('gestionar') — oculta catálogo, muestra tabla
-    Admin->>UI: Click "+ Nuevo producto"
-    UI->>UI: toggleFormNuevo() — muestra formulario
-
+    Admin->>UI: Click "+ Nuevo producto" → toggleFormNuevo()
     Admin->>UI: Llena nombre, categoría, precio, stock, descripción
     Admin->>UI: Click "Guardar producto"
-    UI->>UI: producto-form.submit()
-    UI->>UI: checkValidity()
+    UI->>JS: producto-form.submit() + checkValidity()
     alt Formulario inválido
-        UI->>UI: Muestra errores en campos (.field__error)
+        JS->>UI: Muestra errores en campos (.field__error)
     else Formulario válido
-        UI->>API: POST /api/productos {nombre, categoria, precio, stock, descripcion}
-        API->>PC: crearProducto(req.body)
-        PC->>PC: Validar precio > 0, stock >= 0, nombre.length >= 3
+        JS->>API: POST {nombre, categoria, precio, stock, descripcion}
+        API->>PC: crear(req.body)
+        PC->>PC: Validar precio>0, stock>=0, nombre>=3, categoría en enum
         alt Validación fallida
-            PC-->>API: 400 {error: "Datos inválidos"}
-            API-->>UI: Error mostrado al usuario
+            PC-->>API: 400 {error: "..."}
+            API-->>JS: error → toast
         else Datos válidos
-            PC->>PM: insertar(producto)
-            PM->>DB: INSERT INTO productos ...
-            DB-->>PM: insertId
-            PM-->>PC: producto creado
+            PC->>SP: leer() + push(nuevo) + guardar()
+            SP->>DATA: writeFileSync(productos.json)
             PC-->>API: 201 Created {producto}
-            API-->>UI: {success: true, id: newId}
-            UI->>UI: alert("Producto agregado correctamente")
-            UI->>UI: form.reset() + toggleFormNuevo()
-            UI->>UI: Agrega fila a la tabla
+            API-->>JS: {success}
+            JS->>UI: toast("Producto agregado") + recargar lista
         end
     end
 ```
@@ -366,28 +361,28 @@ sequenceDiagram
 sequenceDiagram
     actor Vendedor
     participant UI as clientes.html
+    participant JS as clientes.js
     participant API as GET /api/clientes/:cedula
-    participant CC as clienteController
-    participant CM as clienteModel
-    participant DB as MySQL
+    participant CC as controllers/clientes
+    participant SC as services/clientes
+    participant DATA as data/clientes.json
 
-    Vendedor->>UI: Escribe cédula en campo de búsqueda
-    Vendedor->>UI: Click "Buscar"
-    UI->>API: GET /api/clientes/1023456789
-    API->>CC: buscarPorCedula("1023456789")
-    CC->>CM: findByCedula(cedula)
-    CM->>DB: SELECT * FROM clientes WHERE cedula = ?
-    DB-->>CM: fila del cliente o vacío
+    Vendedor->>UI: Escribe cédula y click "Buscar"
+    UI->>JS: buscarCliente()
+    JS->>API: GET /api/clientes/1234567890
+    API->>CC: obtenerPorCedula("1234567890")
+    CC->>SC: leer()
+    SC->>DATA: readFileSync(clientes.json)
+    DATA-->>SC: arreglo de clientes
+    SC-->>CC: find(c => c.cedula === cedula)
     alt Cliente encontrado
-        CM-->>CC: {id, nombre, cedula, telefono, correo}
         CC-->>API: 200 OK {cliente}
-        API-->>UI: datos del cliente
-        UI->>UI: Renderiza tarjeta con nombre, cédula, teléfono, correo
+        API-->>JS: datos del cliente
+        JS->>UI: Renderiza tarjeta (nombre, cédula, teléfono, correo)
     else No encontrado
-        CM-->>CC: null
         CC-->>API: 404 Not Found
-        API-->>UI: {error: "Cliente no encontrado"}
-        UI->>UI: Muestra mensaje "Sin resultados"
+        API-->>JS: {error: "Cliente no encontrado"}
+        JS->>UI: Muestra "Sin resultados"
     end
 ```
 
@@ -398,38 +393,30 @@ sequenceDiagram
 ```mermaid
 graph TB
     subgraph CLIENT["🖥️ Navegador del usuario"]
-        B["Chrome / Firefox / Safari\nindex.html · clientes.html\nventas.html · productos.html\npublic/css/styles.css\npublic/js/app.js"]
+        B["Chrome / Firefox / Edge\nVistas servidas desde el backend"]
     end
 
-    subgraph HOSTING_FE["☁️ GitHub Pages (Frontend)"]
-        GH["Repositorio: github.com/Pedrito2626/SalesFlow\nBranch: main\nURL: https://pedrito2626.github.io/SalesFlow"]
+    subgraph SERVER["💻 Servidor local (Node.js)"]
+        NODE["Express.js · puerto 3000\n• Sirve frontend estático (express.static)\n• Expone API REST /api/*"]
+        DATA["📄 backend/data/\nproductos.json · clientes.json · ventas.json"]
+        ENVV["📄 .env  →  PORT=3000"]
     end
 
-    subgraph HOSTING_BE["🚂 Railway (Backend — planeado)"]
-        NODE["Node.js v20+\nExpress.js\nPuerto: 3000\nPROCESS.ENV: DB_HOST, DB_USER, DB_PASS, DB_NAME"]
-    end
-
-    subgraph DB_SERVER["🗄️ MySQL (planeado)"]
-        MYSQL["MySQL 8.x\nBase de datos: salesflow\nTablas: clientes, productos, ventas, detalle_venta"]
-    end
-
-    subgraph ENV["📄 Variables de entorno (.env)"]
-        ENVARS["DB_HOST=localhost\nDB_PORT=3306\nDB_USER=salesflow_user\nDB_PASS=*****\nDB_NAME=salesflow\nPORT=3000"]
-    end
-
-    B -->|"HTTPS · GitHub Pages CDN"| GH
-    B -->|"HTTP/JSON · fetch()\nhttps://salesflow.railway.app/api/*"| NODE
-    NODE -->|"SQL · mysql2 driver\nlocalhost:3306"| MYSQL
-    NODE -.->|"Lee variables"| ENVARS
+    B -->|"HTTP/JSON · fetch()\nhttp://localhost:3000/api/*"| NODE
+    B -->|"HTTP · archivos estáticos\nhttp://localhost:3000/"| NODE
+    NODE -->|"lee / escribe (fs · services/)"| DATA
+    NODE -.->|"lee variables"| ENVV
 ```
 
 **Flujo de despliegue local:**
 ```
 git clone https://github.com/Pedrito2626/SalesFlow.git
-cd SalesFlow
-python -m http.server 3000     # frontend en http://localhost:3000
-# (futuro) npm install && node server.js   # backend en http://localhost:3000/api
+cd SalesFlow/backend
+pnpm install
+pnpm dev            # servidor en http://localhost:3000 (frontend + API)
 ```
+
+> Despliegue público (p. ej. Render/Railway) queda como mejora futura; no forma parte del alcance de esta entrega.
 
 ---
 
@@ -439,54 +426,37 @@ python -m http.server 3000     # frontend en http://localhost:3000
 graph TD
     ROOT["📁 SalesFlow/"]
 
-    ROOT --> INDEX["📄 index.html\nDashboard principal · stats del día"]
-    ROOT --> CLIENTES_H["📄 clientes.html\nVista de registro y búsqueda de clientes"]
-    ROOT --> VENTAS_H["📄 ventas.html\nFormulario POS + carrito de venta"]
-    ROOT --> PROD_H["📄 productos.html\nCatálogo (ver) + inventario CRUD (gestionar)"]
-    ROOT --> README["📄 README.md\nDescripción, stack, instrucciones de ejecución"]
-    ROOT --> GITIGNORE["📄 .gitignore"]
-    ROOT --> ENV_EX["📄 .env.example\nPlantilla de variables de entorno"]
+    ROOT --> BACKEND["📁 backend/"]
+    BACKEND --> SRC["📁 src/"]
+    SRC --> IDX["📄 index.js · app.js\nArranque + configuración Express"]
+    SRC --> RT["📁 routes/\nEndpoints: productos · clientes · ventas · stats"]
+    SRC --> CT["📁 controllers/\nLógica de negocio y validación"]
+    SRC --> SV["📁 services/\nLectura/escritura de los JSON"]
+    SRC --> MW["📁 middleware/\nerrorHandler.js"]
+    BACKEND --> BDATA["📁 data/\nproductos.json · clientes.json · ventas.json"]
+    BACKEND --> PKG["📄 package.json · .env.example"]
 
-    ROOT --> PUBLIC["📁 public/\nAssets estáticos del frontend"]
-    PUBLIC --> CSS_DIR["📁 css/"]
-    CSS_DIR --> STYLES["📄 styles.css\nEstilos globales: tipografía, layout,\ncomponentes, responsive (Outfit · DM Sans)"]
-    PUBLIC --> JS_DIR["📁 js/"]
-    JS_DIR --> APPJS["📄 app.js\nNav mobile · carrito (cartItems, updateSummary)\nbúsqueda en tiempo real · filtro por categoría"]
+    ROOT --> FRONT["📁 frontend/"]
+    FRONT --> HTML["📄 index · clientes · ventas · productos .html"]
+    FRONT --> PUBLIC["📁 public/"]
+    PUBLIC --> CSS["📁 css/styles.css"]
+    PUBLIC --> JS["📁 js/\napi · ui · app · dashboard · productos · clientes · ventas"]
 
-    ROOT --> DOCS["📁 docs/\nDocumentación del proyecto"]
-    DOCS --> ANALISIS["📄 analisis.md\nAnálisis del sistema: actores, datos,\nrestricciones, patrón MVC, mapeo de rutas"]
-    DOCS --> DIAG["🖼️ Diagrama - copia.jpeg\nDiagrama de referencia visual"]
-
-    ROOT --> CONTROLLERS["📁 controllers/ (planeado)\nLógica de negocio — capa Controller"]
-    CONTROLLERS --> CC["📄 clienteController.js"]
-    CONTROLLERS --> PC["📄 productoController.js"]
-    CONTROLLERS --> VC["📄 ventaController.js"]
-
-    ROOT --> ROUTES["📁 routes/ (planeado)\nPuntos de entrada HTTP — Express Router"]
-    ROUTES --> RC["📄 clientes.js\nPOST /api/clientes · GET /api/clientes/:cedula"]
-    ROUTES --> RP["📄 productos.js\nGET·POST·PUT·PATCH·DELETE /api/productos"]
-    ROUTES --> RV["📄 ventas.js\nPOST /api/ventas"]
-
-    ROOT --> MODELS["📁 models/ (planeado)\nAcceso a datos — capa Model"]
-    MODELS --> MC["📄 clienteModel.js"]
-    MODELS --> MP["📄 productoModel.js"]
-    MODELS --> MV["📄 ventaModel.js"]
-    MODELS --> DB["📄 db.js\nPool de conexión MySQL (mysql2)"]
-
-    ROOT --> DATABASE["📁 database/ (planeado)\nScripts SQL de creación y seed"]
-    DATABASE --> SCHEMA["📄 schema.sql\nCREATE TABLE clientes, productos, ventas, detalle_venta"]
-    DATABASE --> SEED["📄 seed.sql\nDatos de prueba iniciales (8 productos)"]
+    ROOT --> DOCS["📁 docs/\nSRS · arquitectura · analisis · diagramas · mockups · uso-IA"]
+    ROOT --> CFG["📄 README.md · .gitignore"]
 ```
 
 **Resumen de responsabilidades por carpeta:**
 
 | Carpeta | Responsabilidad |
 |---|---|
-| `/` (raíz) | Vistas HTML del frontend (las 4 páginas) |
-| `public/css/` | Estilos globales compartidos por todas las vistas |
-| `public/js/` | Lógica del cliente: carrito, navegación, búsqueda |
-| `docs/` | Análisis del sistema, diagramas y documentación |
-| `controllers/` | Lógica de negocio: validaciones, orquestación |
-| `routes/` | Definición de endpoints REST con Express Router |
-| `models/` | Consultas SQL y acceso a la base de datos MySQL |
-| `database/` | Scripts DDL (schema) y DML (seed) para MySQL |
+| `backend/src/routes/` | Definición de endpoints REST con Express Router |
+| `backend/src/controllers/` | Lógica de negocio: validaciones y orquestación |
+| `backend/src/services/` | Lectura/escritura de los archivos JSON (capa Model) |
+| `backend/src/middleware/` | Manejo centralizado de errores |
+| `backend/data/` | Persistencia: archivos JSON |
+| `frontend/` | Vistas HTML del frontend (las 4 páginas) |
+| `frontend/public/css/` | Estilos globales compartidos por todas las vistas |
+| `frontend/public/js/` | Consumo de API, navegación, render y estados de UI |
+| `docs/` | SRS, arquitectura, análisis, diagramas, mockups y registro de IA |
+```
